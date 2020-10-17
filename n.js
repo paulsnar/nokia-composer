@@ -14,6 +14,29 @@ window.stop = () => {
 
 const clamp = (val, min, max) => val < min ? min : val > max ? max : val;
 
+const pitchOrder = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'],
+      pitches = [ ];
+
+(() => {
+  const temperament = 2 ** (1/12);
+  let tone = 880;
+  for (let i = 0; i >= -21; i -= 1) {
+    pitches.unshift(tone);
+    tone /= temperament;
+  }
+  tone = 880 * temperament;
+  for (let octave = 0; octave <= 3; octave += 1) {
+    for (let semitone = 0; semitone < 12; semitone += 1) {
+      pitches.push(tone);
+      tone *= temperament;
+    }
+  }
+  for (let i = 0; i < 2; i += 1) {
+    pitches.push(tone);
+    tone *= temperament;
+  }
+})();
+
 window.play = (song, bpm) => {
   ctx = new AudioContext();
   let buzzer = ctx.createOscillator(),
@@ -27,10 +50,6 @@ window.play = (song, bpm) => {
   let t = 0;
   const spb = 60 / bpm;
   const jiffy = spb / 256;
-
-  const octaves = [220, 440, 880, 1760, 2640],
-        pitchOrder = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'],
-        pitches = [2**(-9/12), 2**(-8/12), 2**(-7/12), 2**(-6/12), 2**(-5/12), 2**(-4/12), 2**(-3/12), 2**(-2/12), 2**(-1/12), 1, 2**(1/12), 2**(2/12)];
 
   for (let note of song.matchAll(/(\d*)?(\.?\.?)([#b]?)([a-h-])([#b]?)(\d?)/gi)) {
     let [_, length, dots, mod1, noteName, mod2, octave] = note.map(x => x.toLowerCase());
@@ -55,9 +74,9 @@ window.play = (song, bpm) => {
     if (octave === '') {
       octave = 1;
     } else {
-      octave = clamp(Number(octave), 0, octaves.length - 1);
+      octave = clamp(Number(octave), 0, 3);
     }
-    let pitch = pitches[noteIndex] * octaves[Number(octave)];
+    let pitch = pitches[pitchOrder.length * octave + noteIndex];
 
     let len = 4 / Number(length);
     if (dots === '.') {
