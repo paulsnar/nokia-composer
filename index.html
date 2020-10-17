@@ -75,15 +75,15 @@
       })();
       // Play song or stop the playback
       function togglePlayback() {
-        if (C) {
+        if (ctx !== null) {
           stop();
           btn.innerText = 'Play';
         } else {
           btn.innerText = 'Stop';
-          play(song.innerText, c(bpm.value, 40, 400));
+          play(song.innerText, Number(bpm.value));
         }
       }
     </script>
-    <script src="n.min.js"></script>
+    <script src="n.js"></script>
   </body>
 </html>
